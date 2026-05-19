@@ -42,7 +42,7 @@ DJANGO_DEFAULT_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'drf_spectacular',
+    'drf_yasg',
 ]
 PROJECT_APPS = [
     'account.apps.AccountConfig',
@@ -51,9 +51,7 @@ PROJECT_APPS = [
 
 INSTALLED_APPS = DJANGO_DEFAULT_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
+REST_FRAMEWORK = {}
 
 
 MIDDLEWARE = [
