@@ -32,6 +32,21 @@ ALLOWED_HOSTS = os.environ.get(
     'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0'
 ).split(',')
 
+# Trusted origins for CSRF checks (Next.js dev server proxies to Django but
+# sends the browser's Origin header, which Django validates against this list).
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
+
+# CORS — allow the Next.js dev server to call Django directly (e.g. Docker).
+# When using the Next.js proxy rewrite, requests are same-origin from the
+# browser's perspective, so CORS isn't needed for local dev, but it is needed
+# in Docker / production where frontend and backend run on different origins.
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Application definition
 
@@ -46,6 +61,7 @@ DJANGO_DEFAULT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -61,6 +77,7 @@ INSTALLED_APPS = DJANGO_DEFAULT_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
