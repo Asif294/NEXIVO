@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from common.enums import UserRoleChoices
 from common.models import BaseModel
+from django.db.models import Q
 
 
 class UserManager(BaseUserManager):
@@ -19,6 +20,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
         return self.create_user(username, email, password, **extra_fields)
+
+    def get_by_identifier(self, identifier):
+        """Return the user matching the given username or phone number, or None."""
+        return self.filter(
+            Q(username=identifier) | Q(phone_number=identifier)
+        ).first()
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModel):
