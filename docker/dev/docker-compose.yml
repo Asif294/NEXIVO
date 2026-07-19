@@ -1,0 +1,44 @@
+# Dev stack: Django backend + Next.js frontend with live reload.
+#
+# Run from this directory:
+#   docker compose up --build
+#
+# Backend  -> http://localhost:8000  (Swagger: http://localhost:8000/docs/swagger/)
+# Frontend -> http://localhost:3000
+
+services:
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: ../docker/dev/Dockerfile.backend
+    container_name: nexivo-backend
+    # Apply migrations, then run the auto-reloading dev server.
+    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0,backend"
+    volumes:
+      # Live-reload: host source is mounted over the image copy.
+      - ../../backend:/app
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ../../frontend/nexivo
+      dockerfile: ../../docker/dev/dockerfile.frontend
+    container_name: nexivo-frontend
+    command: npm run dev -- -H 0.0.0.0 -p 3000
+    environment:
+      # Browser-side calls hit the host-published backend port.
+      NEXT_PUBLIC_API_URL: "http://localhost:8000"
+      # Reliable file watching on mounted volumes.
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ../../frontend/nexivo:/app
+      # Keep the image's node_modules; don't let the bind mount hide it.
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

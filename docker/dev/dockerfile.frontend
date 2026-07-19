@@ -1,0 +1,18 @@
+# Dev image for the Next.js frontend.
+# Build context is the `frontend/nexivo/` directory (see docker-compose.yml).
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install deps first for better layer caching. The installed node_modules is
+# preserved at runtime via an anonymous volume so the bind mount can't shadow it.
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Source is bind-mounted in dev (compose); this COPY is a standalone fallback.
+COPY . .
+
+EXPOSE 3000
+
+# Overridden by compose. -H 0.0.0.0 makes the dev server reachable from the host.
+CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0", "-p", "3000"]
