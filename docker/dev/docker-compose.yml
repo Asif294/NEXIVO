@@ -30,8 +30,10 @@ services:
     container_name: nexivo-frontend
     command: npm run dev -- -H 0.0.0.0 -p 3000
     environment:
-      # Browser-side calls hit the host-published backend port.
-      NEXT_PUBLIC_API_URL: "http://localhost:8000"
+      # The browser calls same-origin /api/*; Next's rewrite (SSR side) proxies
+      # to Django. Inside the network the backend is the `backend` service, not
+      # localhost, so point the proxy there.
+      BACKEND_ORIGIN: "http://backend:8000"
       # Reliable file watching on mounted volumes.
       WATCHPACK_POLLING: "true"
     volumes:

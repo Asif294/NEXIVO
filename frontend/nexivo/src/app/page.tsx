@@ -1,65 +1,102 @@
-import Image from "next/image";
+"use client";
+
+// Dashboard home. Shows a welcome + stats when authenticated, otherwise a
+// prompt to sign in.
+
+import Link from "next/link";
+import {
+  AppstoreOutlined,
+  ShopOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  Col,
+  Empty,
+  Flex,
+  Row,
+  Spin,
+  Statistic,
+  Tag,
+  Typography,
+} from "antd";
+
+import { useAuth } from "@/hooks/auth";
 
 export default function Home() {
+  const { user, status, isAuthenticated } = useAuth();
+
+  if (status === "loading") {
+    return (
+      <Flex align="center" justify="center" style={{ minHeight: "60vh" }}>
+        <Spin size="large" />
+      </Flex>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Flex align="center" justify="center" style={{ minHeight: "60vh" }}>
+        <Card style={{ maxWidth: 460, textAlign: "center" }}>
+          <Typography.Title level={3}>Welcome to Nexivo</Typography.Title>
+          <Typography.Paragraph type="secondary">
+            Sign in to view your dashboard, manage products, and track orders.
+          </Typography.Paragraph>
+          <Flex gap="small" justify="center">
+            <Link href="/login">
+              <Button type="primary" size="large">
+                Sign in
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="large">Create account</Button>
+            </Link>
+          </Flex>
+        </Card>
+      </Flex>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div>
+      <Flex align="center" gap="small" wrap style={{ marginBottom: 24 }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>
+          Welcome back, {user?.full_name || user?.username}
+        </Typography.Title>
+        {user?.is_admin && <Tag color="gold">Admin</Tag>}
+        {user?.is_verified ? (
+          <Tag color="green">Verified</Tag>
+        ) : (
+          <Tag color="orange">Unverified</Tag>
+        )}
+      </Flex>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} lg={8}>
+          <Card>
+            <Statistic title="Products" value={0} prefix={<ShopOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <Card>
+            <Statistic title="Orders" value={0} prefix={<AppstoreOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <Card>
+            <Statistic
+              title="Role"
+              value={user?.role ?? "—"}
+              prefix={<UserOutlined />}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card style={{ marginTop: 24 }}>
+        <Empty description="Your recent activity will appear here." />
+      </Card>
     </div>
   );
 }
